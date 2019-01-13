@@ -1,0 +1,160 @@
+/*********************************************************************
+ *
+ *  Copyright (c) 2019, WildWolfTeam_hzk
+ *  All rights reserved.
+ *
+ *  @Project  : Serial Communication DEBUG
+ *  @FileName : main.C
+ *  @Abstract :
+ *              SerialPort(int portNo = 1)
+ *
+ *  @Log      : Add comment to essential codes
+ *
+ *  @Vertion  : 2.1
+ *  @Author   : HZK
+ *  @Date     : 2019.01.09
+ *
+ *  @Legacy   : 2.0a
+ *  @Author   : HZK
+ *  @Date     : 2018.12.12
+ *
+ *********************************************************************/
+
+#ifndef SerialPort_H
+#define SerialPort_H
+
+
+
+#include <iostream>
+#include <stdio.h>
+/*****配置所需头文件******/
+#include <fcntl.h>      /*文件控制定义*/
+#include <termios.h>    /*PPSIX终端控制定义*/
+/*****Write所需头文件******/
+#include <unistd.h>     /*Unix标准函数定义*/
+
+using namespace std;
+
+//延时函数，防止发送过快
+void Sleep_us(unsigned int secs);
+
+
+class SerialPort {
+    //串口标志量
+    int fd;
+
+public:
+
+    /** 打开串口
+     *  @param:    portNo 串口编号,默认值为1,即COM1,注意,尽量不要大于9
+     *  @return
+     */
+    SerialPort(int portNo = 1) {
+
+
+        const char* DeviceName[4] = {"", "/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2"};
+
+         /* WARNING :  终端设备默认会设置为控制终端，因此open(O_NOCTTY不作为控制终端)
+         * Terminals'll default to be set as Control Terminals
+         */
+         /*打开串口*/
+        fd=open(DeviceName[portNo], O_RDWR|O_NONBLOCK|O_NOCTTY|O_NDELAY);
+
+        if (fd == -1)
+        {
+            perror("Can't Open Serial Port");
+        }
+        else
+            printf("Open Serial Port %s Successful\n", DeviceName[portNo]);
+
+        /*改为阻塞模式*/
+        if (fcntl(fd, F_SETFL, 0) < 0)
+            printf("fcntl failed!\n");
+        else
+            printf("fcntl=%d\n", fcntl(fd, F_SETFL, 0));
+
+        /*测试是否为终端设备*/
+        if (isatty(STDIN_FILENO) == 0)
+            printf("standard input is not a terminal device\n");
+        else
+            printf("isatty success!\n");
+
+    }
+
+    /** 关闭串口 **/
+
+    ~SerialPort(void) {
+        if (!close(fd))
+            printf("Close Serial Port Successful\n");
+    }
+
+    /** 初始化串口函数
+     *  @param:  int baud   波特率,默认为115200
+     *  ()@param:  char parity 是否进行奇偶校验,'Y'表示需要奇偶校验,'N'表示不需要奇偶校验
+     *  @param:  int databits 数据位的个数,默认值为8个数据位
+     *  @return: bool  初始化是否成功
+     *  @note:   在使用其他本类提供的函数前,请先调用本函数进行串口的初始化
+     *　　　　　   函数提供了一些常用的串口参数设置
+     *           本串口类析构时会自动关闭串口,无需额外执行关闭串口
+     */
+    bool initPort(int baud = B115200)
+    {
+        struct termios newstate, option;
+        /*保存测试现有串口参数设置，在这里如果串口号等出错，会有相关的出错信息*/
+        if (tcgetattr(fd, &option) != 0)
+        {
+            perror("SetupSerial");
+            printf("tcgetattr( fd,&option) -> %d\n",tcgetattr(fd, &option));
+            return 0;
+        }
+        /*串口设置*/
+
+        //本地连线, 取消控制功能 | 开始接收
+        newstate.c_cflag |= CLOCAL | CREAD;
+        //设置字符大小
+        newstate.c_cflag &= ~CSIZE;
+        //设置停止位1
+        newstate.c_cflag &= ~CSTOPB;
+        //设置数据位8位
+        newstate.c_cflag |= CS8;
+        //设置无奇偶校验位，N
+        newstate.c_cflag &= ~PARENB;
+
+        /*阻塞模式的设置*/
+        option.c_cc[VTIME]=0;
+        option.c_cc[VMIN]=1;
+
+        /*设置发送波特率*/
+        cfsetospeed(&newstate, baud);
+
+        /*激活新配置*/
+        if ((tcsetattr(fd, TCSANOW, &option)) != 0)
+        {
+            perror("Com Set Error");
+            return 0;
+        }
+        printf("Com  Set done!\n");
+        return 1;
+    }
+
+
+/** 向串口写数据
+ *
+ *  将缓冲区中的数据写入到串口
+ *  @param:  unsigned char * buf_temp 指向需要写入串口的数据缓冲区
+ *  ()@param:  unsigned int length 需要写入的数据长度
+ *  @return: bool  操作是否成功
+ */
+    bool WriteData(unsigned char *buf)
+    {
+        if (write(fd, buf, sizeof(buf) == -1))
+        {
+            printf("write failed.");
+            return 0;
+        }
+        return 1;
+    }
+};
+
+
+#endif SerialPort_H
