@@ -3,4 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.C
+SOURCES += main.C \
+    SerialPort.C
+
+HEADERS += \
+    SerialPort.h
