@@ -113,3 +113,48 @@
         return 1;
     }
 
+
+/** 串口读取
+*  @param:  int fd
+*
+*  @return: string  返回收到的字符串
+*  @note:   在使用其他本类提供的函数前,请先调用本函数进行串口的初始化
+*           逐字节读取并存到字符串
+*           等待0.01s后结束读取,将所得字符串返回
+*/
+string receiveData(int fd)
+{
+    char rece_buf_temp[RECEBUFFERSIZE];
+    string rece_buf = "";
+    int rece_COUNT=0;
+    int rece_First_COUNT=0;
+
+    do{
+        memset(rece_buf_temp, 0, RECEBUFFERSIZE); //清空緩衝
+        int rece_buf_temp_int[RECEBUFFERSIZE];
+        //int Read = read(fd, rece_buf_temp, RECEBUFFERSIZE); //接收資料
+        read(fd, rece_buf_temp_int, RECEBUFFERSIZE); //接收数据
+        //cout << "Read= " << Read << endl;
+        if(0 >= Read && !rece_buf.empty())
+        {//如果这一次沒有收到数据，且未成功收到
+            rece_COUNT++;
+            //printf("rece_COUNT = %d\n",rece_COUNT);
+            if(rece_COUNT>10)break;
+        }
+        else if(0 < Read)
+        {//如果有收到数据
+            //成功收到数据,计数归0
+            rece_COUNT=0;
+            //将读到的数据存入rece_buf
+            rece_buf.append((char*)rece_buf_temp, Read);
+        }
+        else
+        {//首次读取成功,记录第一次成功读取
+            rece_First_COUNT++;
+            printf("rece_First_COUNT = %d\n",rece_First_COUNT);
+        }
+    }while(rece_First_COUNT + rece_COUNT < 100);//设定串口读取次数
+    return rece_buf;
+}
+
+
