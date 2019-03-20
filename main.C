@@ -9,12 +9,17 @@
  *  @Abstract : SerialPort(int portNo = 1);
  *              bool initPort(int baud = B115200);
  *              bool WriteData(char *buf);
+ *              string receiveData(int fd);
  *
- *  @Log      : Bundle up the codes to a class
+ *  @Log      : Add SerialPort Read.
  *
- *  @Vertion  : 2.2
+ *  @Vertion  : 2.5
  *  @Author   : HZK
- *  @Date     : 2018.01.13
+ *  @Date     : 2019.03.20
+ *
+ *  @Legacy   : 2.2
+ *  @Author   : HZK
+ *  @Date     : 2019.01.13
  *
  *  @Legacy   : 2.1
  *  @Author   : HZK
@@ -41,6 +46,8 @@ int main()
         sprintf(g_buf, "%s%d%s%d", "S", 320 + i, ",", 240 - i);
         std::cout << g_buf << std::endl;
         Port.WriteData(g_buf);
+        string str = Port.Receive_Data();
+        cout << "Serial Port Receive : " << str << endl<< str.size()<< endl
     }
     return 0;
 
