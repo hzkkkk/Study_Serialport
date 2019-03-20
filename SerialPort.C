@@ -79,14 +79,14 @@
         newstate.c_cflag &= ~PARENB;
 
         /*阻塞模式的设置*/
-        option.c_cc[VTIME]=0;
-        option.c_cc[VMIN]=1;
+        newstate.c_cc[VTIME]=0.01;
+        newstate.c_cc[VMIN]=0;
 
         /*设置发送波特率*/
         cfsetospeed(&newstate, baud);
 
         /*激活新配置*/
-        if ((tcsetattr(fd, TCSANOW, &option)) != 0)
+        if ((tcsetattr(fd, TCSANOW, &newstate)) != 0)
         {
             perror("Com Set Error\n");
             return 0;
