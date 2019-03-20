@@ -122,7 +122,7 @@
 *           逐字节读取并存到字符串
 *           等待0.01s后结束读取,将所得字符串返回
 */
-string receiveData(int fd)
+string ReceiveData()
 {
     char rece_buf_temp[RECEBUFFERSIZE];
     string rece_buf = "";
