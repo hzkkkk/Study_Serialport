@@ -130,15 +130,12 @@ string receiveData(int fd)
     int rece_First_COUNT=0;
 
     do{
-        memset(rece_buf_temp, 0, RECEBUFFERSIZE); //清空緩衝
+        memset(rece_buf_temp, 0, RECEBUFFERSIZE); //清空缓存
         int rece_buf_temp_int[RECEBUFFERSIZE];
-        //int Read = read(fd, rece_buf_temp, RECEBUFFERSIZE); //接收資料
         read(fd, rece_buf_temp_int, RECEBUFFERSIZE); //接收数据
-        //cout << "Read= " << Read << endl;
         if(0 >= Read && !rece_buf.empty())
         {//如果这一次沒有收到数据，且未成功收到
             rece_COUNT++;
-            //printf("rece_COUNT = %d\n",rece_COUNT);
             if(rece_COUNT>10)break;
         }
         else if(0 < Read)
@@ -151,9 +148,9 @@ string receiveData(int fd)
         else
         {//首次读取成功,记录第一次成功读取
             rece_First_COUNT++;
-            printf("rece_First_COUNT = %d\n",rece_First_COUNT);
         }
     }while(rece_First_COUNT + rece_COUNT < 100);//设定串口读取次数
+     //cout << "rece_buf= " << rece_buf << endl;
     return rece_buf;
 }
 
