@@ -29,7 +29,7 @@ public:
     SerialPort(int portNo = 1);
     bool initPort(int baud = B115200);
     bool WriteData(char *buf);
-    string receiveData(int fd);
+    string ReceiveData(int fd);
 
 public:
     ~SerialPort();
